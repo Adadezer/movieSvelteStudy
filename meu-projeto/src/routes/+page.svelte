@@ -15,13 +15,32 @@
 
 	onMount(async () => {
 		const data = await getShows();
-		console.log(data);
+		showList = data;
+
+		console.log('Shows carregados:', showList); // Log para verificar os dados carregados
 	});
 </script>
 
-<div class="p-2">
-	<Search bind:searchShow={search} />
-	{#each filteredShows as show}
-		<ShowCard {show} />
-	{/each}
+<div class="min-h-screen p-6 text-gray-100 antialiased">
+	<!-- Área de Busca -->
+	<div class="mx-auto mb-10 max-w-xl text-center">
+		<h1 class="mb-4 text-3xl font-extrabold tracking-tight text-[#ff5820] md:text-4xl">
+			Descubra novos programas
+		</h1>
+		<Search bind:searchShow={search} />
+	</div>
+
+	<!-- GRID RESPONSIVO: 1 coluna no mobile, 2 em telas médias, 3 em grandes e 4 em extra grandes -->
+	<main
+		class="mx-auto grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+	>
+		{#each filteredShows as show (show.id)}
+			<ShowCard {show} />
+		{:else}
+			<!-- Estado vazio caso a busca não encontre nada -->
+			<div class="col-span-full py-20 text-center text-gray-500">
+				<p class="text-xl">Nenhum resultado encontrado para "{search}"</p>
+			</div>
+		{/each}
+	</main>
 </div>

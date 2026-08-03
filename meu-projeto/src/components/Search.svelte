@@ -2,9 +2,7 @@
 	let { searchShow = $bindable() }: { searchShow: string } = $props();
 </script>
 
-<h2>Descubra novos programas</h2>
-
-<div class="mb-15 flex gap-2">
+<div class="mb-15 flex justify-center gap-2">
 	<input
 		type="text"
 		placeholder="digite o nome do programa"
