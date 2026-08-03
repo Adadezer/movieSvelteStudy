@@ -24,4 +24,5 @@ export type Show = {
 	rating: number;
 	year: string;
 	image: string;
+	genres: string[];
 };
