@@ -29,11 +29,16 @@
 			year: 2015
 		}
 	];
+
+	let search = $state('');
+	let filteredMovies = $derived(
+		movieList.filter((movie) => movie.title.toLowerCase().includes(search.toLowerCase()))
+	);
 </script>
 
 <div class="p-2">
-	<Search />
-	{#each movieList as movie}
+	<Search bind:searchMovie={search} />
+	{#each filteredMovies as movie}
 		<MovieCard {movie} />
 	{/each}
 </div>
