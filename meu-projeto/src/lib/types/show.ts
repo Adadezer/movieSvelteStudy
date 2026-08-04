@@ -1,4 +1,4 @@
-export type TVMazeSearchResult = {
+export type TVMazeResult = {
 	// score: number;
 
 	// show: {

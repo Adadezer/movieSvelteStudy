@@ -1,10 +1,10 @@
 <script lang="ts">
 	import ShowCard from '../components/ShowCard.svelte';
 	import Search from '../components/Search.svelte';
-	import type { Show, TVMazeSearchResult } from '$lib/types/show';
+	import type { Show, TVMazeResult } from '$lib/types/show';
 
 	// let showList = $state<Show[]>([]);
-	let showList = $state<TVMazeSearchResult[]>([]);
+	let showList = $state<TVMazeResult[]>([]);
 
 	let search = $state('');
 	// let filteredShows = $derived(

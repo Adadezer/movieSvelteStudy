@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Show, TVMazeSearchResult } from '$lib/types/show';
+	import type { Show, TVMazeResult } from '$lib/types/show';
 
-	let { show }: { show: TVMazeSearchResult } = $props();
+	let { show }: { show: TVMazeResult } = $props();
 </script>
 
 <article
