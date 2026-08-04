@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Show } from '$lib/types/show';
+	import type { Show, TVMazeSearchResult } from '$lib/types/show';
 
-	let { show }: { show: Show } = $props();
+	let { show }: { show: TVMazeSearchResult } = $props();
 </script>
 
 <article
@@ -9,9 +9,15 @@
 >
 	<!-- Container da Imagem com Aspect Ratio de Poster (2:3) -->
 	<div class="relative aspect-2/3 overflow-hidden">
-		<img
+		<!-- <img
 			src={show.image || '/placeholder.png'}
 			alt={show.title}
+			class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+			loading="lazy"
+		/> -->
+		<img
+			src={show.image?.original || '/placeholder.png'}
+			alt={show.name}
 			class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
 			loading="lazy"
 		/>
@@ -20,14 +26,14 @@
 		<div
 			class="absolute top-3 right-3 flex items-center gap-1 rounded-md border border-gray-800 bg-gray-950/80 px-2 py-1 text-xs font-bold text-yellow-500 backdrop-blur-sm"
 		>
-			⭐ {show.rating}
+			⭐ {show.rating.average || ''}
 		</div>
 	</div>
 
 	<!-- Conteúdo de Texto -->
 	<div class="flex flex-1 flex-col p-4">
 		<div class="mb-2 flex items-center justify-between text-xs font-medium text-gray-400">
-			<span>{show.year}</span>
+			<span>{show.premiered.slice(0, 4)}</span>
 			<!-- 1. Verifica se a lista de gêneros existe e tem itens -->
 			{#if show.genres && show.genres.length > 0}
 				<div class="flex gap-1">
@@ -45,7 +51,7 @@
 		<h3
 			class="line-clamp-2 text-base font-bold text-gray-100 transition-colors duration-200 group-hover:text-[#ff5820]"
 		>
-			{show.title}
+			{show.name}
 		</h3>
 
 		<!-- Espaçador elástico para empurrar o botão sempre para o rodapé do card -->
