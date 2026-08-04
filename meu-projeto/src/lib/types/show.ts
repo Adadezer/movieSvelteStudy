@@ -1,21 +1,21 @@
 export type TVMazeSearchResult = {
-	score: number;
+	// score: number;
 
-	show: {
-		id: number;
-		name: string;
-		premiered: string;
-		genres: string[];
+	// show: {
+	id: number;
+	name: string;
+	premiered: string;
+	genres: string[];
 
-		rating: {
-			average: number | null;
-		};
-
-		image: {
-			medium: string;
-			original: string;
-		} | null;
+	rating: {
+		average: number | null;
 	};
+
+	image: {
+		medium: string;
+		original: string;
+	} | null;
+	// };
 };
 
 export type Show = {

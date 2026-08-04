@@ -1,14 +1,15 @@
 <script lang="ts">
 	import ShowCard from '../components/ShowCard.svelte';
 	import Search from '../components/Search.svelte';
-	import type { Show } from '$lib/types/show';
+	import type { Show, TVMazeSearchResult } from '$lib/types/show';
 
-	let showList = $state<Show[]>([]);
+	// let showList = $state<Show[]>([]);
+	let showList = $state<TVMazeSearchResult[]>([]);
 
 	let search = $state('');
-	let filteredShows = $derived(
-		showList.filter((show) => show.title.toLowerCase().includes(search.toLowerCase()))
-	);
+	// let filteredShows = $derived(
+	// 	showList.filter((show) => show.title.toLowerCase().includes(search.toLowerCase()))
+	// );
 
 	import { getShows } from '$lib/api/tvmaze';
 	import { onMount } from 'svelte';
@@ -23,10 +24,13 @@
 
 <div class="min-h-screen p-6 text-gray-100 antialiased">
 	<!-- Área de Busca -->
-	<div class="mx-auto mb-10 max-w-xl text-center">
+	<div class="mx-auto mb-10 max-w-7xl text-center">
 		<h1 class="mb-4 text-3xl font-extrabold tracking-tight text-[#ff5820] md:text-4xl">
-			Descubra novos programas
+			Pipoca Flix
 		</h1>
+		<h3 class="mb-20 text-xl font-light tracking-tight text-neutral-200 md:text-xl">
+			Veja sobre seus filmes e séries favoritos
+		</h3>
 		<Search bind:searchShow={search} />
 	</div>
 
@@ -34,7 +38,7 @@
 	<main
 		class="mx-auto grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
 	>
-		{#each filteredShows as show (show.id)}
+		{#each showList as show (show.id)}
 			<ShowCard {show} />
 		{:else}
 			<!-- Estado vazio caso a busca não encontre nada -->
