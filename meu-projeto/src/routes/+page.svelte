@@ -1,24 +1,28 @@
 <script lang="ts">
 	import ShowCard from '../components/ShowCard.svelte';
 	import Search from '../components/Search.svelte';
-	import type { Show, TVMazeSearchResult } from '$lib/types/show';
+	import type { Show } from '$lib/types/show';
+	import { getShows, searchShows } from '$lib/api/tvmaze';
 
-	// let showList = $state<Show[]>([]);
-	let showList = $state<TVMazeSearchResult[]>([]);
+	let showList = $state<Show[]>([]);
 
 	let search = $state('');
-	// let filteredShows = $derived(
-	// 	showList.filter((show) => show.title.toLowerCase().includes(search.toLowerCase()))
-	// );
 
-	import { getShows } from '$lib/api/tvmaze';
-	import { onMount } from 'svelte';
+	let requestId = 0;
 
-	onMount(async () => {
-		const data = await getShows();
+	async function loadShows(query: string) {
+		const id = ++requestId; // este pedido é o nº N
+
+		const data = query.trim() !== '' ? await searchShows(query) : await getShows();
+
+		if (id !== requestId) return; // já saiu um pedido mais novo -> descarta este
 		showList = data;
+	}
 
-		console.log('Shows carregados:', showList); // Log para verificar os dados carregados
+	$effect(() => {
+		const query = search; // leitura rastreada — NÃO remover
+		const timer = setTimeout(() => loadShows(query), 500);
+		return () => clearTimeout(timer);
 	});
 </script>
 
@@ -26,7 +30,7 @@
 	<!-- Área de Busca -->
 	<div class="mx-auto mb-10 max-w-7xl text-center">
 		<h1 class="mb-4 text-3xl font-extrabold tracking-tight text-[#ff5820] md:text-4xl">
-			Pipoca Flix
+			🍿 Pipoca Flix
 		</h1>
 		<h3 class="mb-20 text-xl font-light tracking-tight text-neutral-200 md:text-xl">
 			Veja sobre seus filmes e séries favoritos

@@ -1,19 +1,24 @@
-import { PUBLIC_API_URL } from '$env/static/public';
-// import type { Show, TVMazeSearchResult } from '$lib/types/show';
+import { get } from '$lib/api/client';
+import type { Show, TVMazeResult, TVMazeSearchResult } from '$lib/types/show';
+
+function mapToShow(result: TVMazeResult): Show {
+	return {
+		id: result.id,
+		title: result.name,
+		rating: result.rating.average ?? 0,
+		year: result.premiered?.slice(0, 4) ?? '-',
+		image: result.image?.medium ?? result.image?.original ?? '',
+		genres: result.genres
+	};
+}
 
 export async function getShows() {
-	// const url = `${PUBLIC_API_URL}/search/shows?q=pokemon`;
-	const url = `${PUBLIC_API_URL}/shows`;
-	const response = await fetch(url);
-	const data = await response.json();
-	console.log('Dados recebidos da API:', data); // Log para verificar os dados recebidos
-	return data;
-	// return data.map((item: TVMazeSearchResult) => ({
-	// 	id: item.show.id,
-	// 	title: item.show.name,
-	// 	rating: item.show.rating.average ?? 0,
-	// 	year: item.show.premiered.slice(0, 4),
-	// 	image: item.show.image?.medium ?? item.show.image?.original ?? '',
-	// 	genres: item.show.genres
-	// }));
+	const results = await get<TVMazeResult[]>('/shows');
+	return results.map(mapToShow);
+}
+
+export async function searchShows(query: string) {
+	const results = await get<TVMazeSearchResult[]>(`/search/shows?q=${encodeURIComponent(query)}`);
+
+	return results.map((result) => mapToShow(result.show));
 }
