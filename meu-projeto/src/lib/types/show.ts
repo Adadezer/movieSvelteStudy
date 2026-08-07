@@ -1,7 +1,4 @@
 export type TVMazeResult = {
-	// score: number;
-
-	// show: {
 	id: number;
 	name: string;
 	premiered: string;
@@ -15,7 +12,11 @@ export type TVMazeResult = {
 		medium: string;
 		original: string;
 	} | null;
-	// };
+};
+
+export type TVMazeSearchResult = {
+	score: number;
+	show: TVMazeResult;
 };
 
 export type Show = {
