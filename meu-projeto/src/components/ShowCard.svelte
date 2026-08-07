@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Show } from '$lib/types/show';
+	import ImageIcon from 'phosphor-svelte/lib/ImageIcon';
 
 	let { show }: { show: Show } = $props();
 </script>
@@ -9,12 +10,18 @@
 >
 	<!-- Container da Imagem com Aspect Ratio de Poster (2:3) -->
 	<div class="relative aspect-2/3 overflow-hidden">
-		<img
-			src={show.image}
-			alt={show.title}
-			class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-			loading="lazy"
-		/>
+		{#if show.image}
+			<img
+				src={show.image}
+				alt={show.title}
+				class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+				loading="lazy"
+			/>
+		{:else}
+			<div class="flex h-full w-full items-center justify-center bg-gray-800 text-gray-600">
+				<ImageIcon size={48} />
+			</div>
+		{/if}
 
 		<!-- Badge de Nota flutuando no poster -->
 		<div
