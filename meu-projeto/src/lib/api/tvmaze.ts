@@ -6,7 +6,7 @@ function mapToShow(result: TVMazeResult): Show {
 		id: result.id,
 		title: result.name,
 		rating: result.rating.average ?? 0,
-		year: result.premiered.slice(0, 4),
+		year: result.premiered?.slice(0, 4) ?? '-',
 		image: result.image?.medium ?? result.image?.original ?? '',
 		genres: result.genres
 	};

@@ -1,7 +1,7 @@
 export type TVMazeResult = {
 	id: number;
 	name: string;
-	premiered: string;
+	premiered: string | null;
 	genres: string[];
 
 	rating: {
