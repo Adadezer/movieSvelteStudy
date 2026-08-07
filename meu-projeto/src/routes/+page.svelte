@@ -8,22 +8,20 @@
 
 	let search = $state('');
 
-	let timer: ReturnType<typeof setTimeout>;
+	let requestId = 0;
 
-	async function loadShows() {
-		let data;
-		if (search.trim() !== '') {
-			data = await searchShows(search);
-		} else {
-			data = await getShows();
-		}
+	async function loadShows(query: string) {
+		const id = ++requestId; // este pedido é o nº N
 
+		const data = query.trim() !== '' ? await searchShows(query) : await getShows();
+
+		if (id !== requestId) return; // já saiu um pedido mais novo -> descarta este
 		showList = data;
 	}
 
 	$effect(() => {
-		search; // Dependência para re-executar o efeito quando a busca mudar
-		timer = setTimeout(() => loadShows(), 500);
+		const query = search; // leitura rastreada — NÃO remover
+		const timer = setTimeout(() => loadShows(query), 500);
 		return () => clearTimeout(timer);
 	});
 </script>
