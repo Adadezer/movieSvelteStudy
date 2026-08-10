@@ -2,24 +2,27 @@
 	import StarIcon from 'phosphor-svelte/lib/StarIcon';
 	import CalendarIcon from 'phosphor-svelte/lib/CalendarIcon';
 	import MonitorPlayIcon from 'phosphor-svelte/lib/MonitorPlayIcon';
+	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
+	import { goto } from '$app/navigation';
+
 	let { data } = $props();
 
 	const show = $derived(data.show);
 
 	const showInfo = $derived([
 		{
-			info: 'Nota',
-			value: show.rating,
+			titleInfo: 'Nota',
+			info: show.rating,
 			icon: StarIcon
 		},
 		{
-			info: 'Ano',
-			value: show.year,
+			titleInfo: 'Ano',
+			info: show.year,
 			icon: CalendarIcon
 		},
 		{
-			info: 'Status',
-			value: show.status,
+			titleInfo: 'Status',
+			info: show.status,
 			icon: MonitorPlayIcon
 		}
 	]);
@@ -27,6 +30,15 @@
 
 <div class="min-h-screen p-6 text-gray-100">
 	<div class="mx-auto max-w-6xl">
+		<div class="mx-auto mb-6 flex max-w-6xl">
+			<button
+				onclick={() => goto('/')}
+				class=" flex items-center gap-1 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-[#ff5820] hover:bg-[#ff5820] hover:text-white"
+			>
+				<ArrowLeftIcon size={14} weight="fill" />
+				Voltar
+			</button>
+		</div>
 		<div class="overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 shadow-lg">
 			<div class="grid gap-8 p-8 md:grid-cols-[300px_1fr]">
 				<!-- Poster -->
@@ -42,11 +54,11 @@
 						</h1>
 
 						<div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-400">
-							{#each showInfo as { info, value, icon: Icon } (info)}
+							{#each showInfo as { titleInfo, info, icon: Icon } (titleInfo)}
 								<div class="flex items-center gap-1.5">
 									<Icon size={14} weight="fill" class="text-yellow-500" />
-									<span class="font-semibold text-gray-200">{info}:</span>
-									<span>{value}</span>
+									<span class="font-semibold text-gray-200">{titleInfo}:</span>
+									<span>{info}</span>
 								</div>
 							{/each}
 						</div>
