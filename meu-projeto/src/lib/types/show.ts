@@ -12,6 +12,10 @@ export type TVMazeResult = {
 		medium: string;
 		original: string;
 	} | null;
+
+	summary: string | null;
+	status: string | null;
+	officialSite: string | null;
 };
 
 export type TVMazeSearchResult = {
@@ -26,4 +30,7 @@ export type Show = {
 	year: string;
 	image: string;
 	genres: string[];
+	summary: string;
+	status: string;
+	officialSite: string;
 };

@@ -6,5 +6,6 @@ export const get = async <T>(url: string): Promise<T> => {
 	}
 
 	const data = await response.json();
+	console.log('data: ', data);
 	return data as T;
 };

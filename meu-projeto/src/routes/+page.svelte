@@ -17,6 +17,8 @@
 
 		if (id !== requestId) return; // já saiu um pedido mais novo -> descarta este
 		showList = data;
+
+		console.log('showList: ', data);
 	}
 
 	$effect(() => {

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Show } from '$lib/types/show';
 	import ImageIcon from 'phosphor-svelte/lib/ImageIcon';
+	import StarIcon from 'phosphor-svelte/lib/StarIcon';
 
 	let { show }: { show: Show } = $props();
 </script>
@@ -27,7 +28,8 @@
 		<div
 			class="absolute top-3 right-3 flex items-center gap-1 rounded-md border border-gray-800 bg-gray-950/80 px-2 py-1 text-xs font-bold text-yellow-500 backdrop-blur-sm"
 		>
-			⭐ {show.rating}
+			<StarIcon size={14} weight="fill" class="text-yellow-300" />
+			{show.rating}
 		</div>
 	</div>
 
@@ -57,11 +59,12 @@
 
 		<!-- Espaçador elástico para empurrar o botão sempre para o rodapé do card -->
 		<div class="flex flex-1 items-end pt-4">
-			<button
+			<a
+				href={`/movie/${show.id}`}
 				class="w-full rounded-lg bg-gray-800 py-2 text-center text-sm font-semibold text-gray-200 transition-colors duration-200 hover:bg-[#ff5820] hover:text-white"
 			>
 				Ver detalhes
-			</button>
+			</a>
 		</div>
 	</div>
 </article>
