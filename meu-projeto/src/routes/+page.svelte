@@ -1,31 +1,25 @@
 <script lang="ts">
 	import ShowCard from '../components/ShowCard.svelte';
 	import Search from '../components/Search.svelte';
-	import type { Show } from '$lib/types/show';
 	import { getShows, searchShows } from '$lib/api/tvmaze';
-
-	let showList = $state<Show[]>([]);
+	import { createQuery } from '@tanstack/svelte-query';
 
 	let search = $state('');
 
-	let requestId = 0;
-
-	async function loadShows(query: string) {
-		const id = ++requestId; // este pedido é o nº N
-
-		const data = query.trim() !== '' ? await searchShows(query) : await getShows();
-
-		if (id !== requestId) return; // já saiu um pedido mais novo -> descarta este
-		showList = data;
-
-		console.log('showList: ', data);
-	}
+	let debouncedSearch = $state('');
 
 	$effect(() => {
 		const query = search; // leitura rastreada — NÃO remover
-		const timer = setTimeout(() => loadShows(query), 500);
+		const timer = setTimeout(() => (debouncedSearch = query), 350);
 		return () => clearTimeout(timer);
 	});
+
+	const showsQuery = createQuery(() => ({
+		queryKey: ['shows', debouncedSearch],
+		queryFn: () => (debouncedSearch.trim() !== '' ? searchShows(debouncedSearch) : getShows())
+	}));
+
+	console.log('showsQuery: ', showsQuery);
 </script>
 
 <div class="min-h-screen p-6 text-gray-100 antialiased">
@@ -44,13 +38,23 @@
 	<main
 		class="mx-auto grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
 	>
-		{#each showList as show (show.id)}
-			<ShowCard {show} />
-		{:else}
-			<!-- Estado vazio caso a busca não encontre nada -->
+		{#if showsQuery.isLoading}
 			<div class="col-span-full py-20 text-center text-gray-500">
-				<p class="text-xl">Nenhum resultado encontrado para "{search}"</p>
+				<p class="text-xl">Carregando...</p>
 			</div>
-		{/each}
+		{:else if showsQuery.isError}
+			<div class="col-span-full py-20 text-center text-gray-500">
+				<p class="text-xl">Erro ao carregar os dados. Tente novamente mais tarde.</p>
+			</div>
+		{:else}
+			{#each showsQuery.data as show (show.id)}
+				<ShowCard {show} />
+			{:else}
+				<!-- Estado vazio caso a busca não encontre nada -->
+				<div class="col-span-full py-20 text-center text-gray-500">
+					<p class="text-xl">Nenhum resultado encontrado para "{search}"</p>
+				</div>
+			{/each}
+		{/if}
 	</main>
 </div>
