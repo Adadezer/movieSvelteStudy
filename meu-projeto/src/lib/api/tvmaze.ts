@@ -1,4 +1,5 @@
 import { get } from '$lib/api/client';
+import type { CastMember, TVMazeCastResult } from '$lib/types/cast';
 import type { Show, TVMazeResult, TVMazeSearchResult } from '$lib/types/show';
 
 function mapStatus(status: string | null): string {
@@ -33,6 +34,17 @@ function mapToShow(result: TVMazeResult): Show {
 		officialSite: result.officialSite ?? ''
 	};
 }
+
+function mapToCastMember(entry: TVMazeCastResult): CastMember {
+	return {
+		id: entry.character.id,
+		actor: entry.person.name,
+		character: entry.character.name,
+		image: entry.character.image?.medium ?? entry.person.image?.medium ?? '',
+		voice: entry.voice
+	};
+}
+
 export async function getShows() {
 	const results = await get<TVMazeResult[]>('/shows');
 	return results.map(mapToShow);
@@ -47,4 +59,9 @@ export async function searchShows(query: string) {
 export async function getShowById(id: string) {
 	const result = await get<TVMazeResult>(`/shows/${id}`);
 	return mapToShow(result);
+}
+
+export async function getShowCastById(id: string) {
+	const results = await get<TVMazeCastResult[]>(`/shows/${id}/cast`);
+	return results.map(mapToCastMember);
 }

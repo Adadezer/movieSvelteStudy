@@ -3,6 +3,8 @@
 	import CalendarIcon from 'phosphor-svelte/lib/CalendarIcon';
 	import MonitorPlayIcon from 'phosphor-svelte/lib/MonitorPlayIcon';
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
+	import UserIcon from 'phosphor-svelte/lib/UserIcon';
+	import MicrophoneIcon from 'phosphor-svelte/lib/MicrophoneIcon';
 	import { goto } from '$app/navigation';
 
 	let { data } = $props();
@@ -26,6 +28,8 @@
 			icon: MonitorPlayIcon
 		}
 	]);
+
+	const cast = $derived(data.cast);
 </script>
 
 <div class="min-h-screen p-6 text-gray-100">
@@ -94,6 +98,60 @@
 					{/if}
 				</div>
 			</div>
+
+			<!-- Elenco -->
+			{#if cast.length > 0}
+				<div class="border-t border-neutral-800 p-8">
+					<h2 class="mb-4 text-2xl font-semibold text-[#ff5820]">Elenco</h2>
+					<!-- Mesma grade da home: 1 coluna no mobile, 2 no tablet, 3 e 4 no desktop -->
+					<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+						{#each cast as member (member.id)}
+							<article class="group flex h-full items-center gap-3 overflow-hidden">
+								<!-- shrink-0: a foto mantém o tamanho, quem cede espaço é o texto -->
+								<div class="relative aspect-2/3 w-20 shrink-0 overflow-hidden rounded-lg">
+									{#if member.image}
+										<img
+											src={member.image}
+											alt={member.actor}
+											class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+											loading="lazy"
+										/>
+									{:else}
+										<div
+											class="flex h-full w-full items-center justify-center bg-neutral-800 text-neutral-600"
+										>
+											<UserIcon size={28} />
+										</div>
+									{/if}
+								</div>
+
+								<!-- min-w-0 deixa o texto encolher para o line-clamp poder agir -->
+								<div class="flex min-w-0 flex-col gap-5">
+									<div class="flex flex-col gap-1">
+										{#if member.voice}
+											<span
+												class="inline-flex w-fit items-center gap-1 rounded-full bg-[#ff5820]/15 px-2 py-0.5 text-xs font-medium text-[#ff5820]"
+											>
+												<MicrophoneIcon size={12} weight="fill" />
+												Voz
+											</span>
+										{:else}
+											<h3 class="text-sm font-semibold text-[#ff5820]">Ator(a):</h3>
+										{/if}
+										<span class="line-clamp-2 font-semibold text-gray-100">
+											{member.actor}
+										</span>
+									</div>
+									<div class="flex flex-col gap-1">
+										<h3 class="text-sm font-semibold text-[#ff5820]">Como:</h3>
+										<span class="line-clamp-2 text-sm text-neutral-400">{member.character}</span>
+									</div>
+								</div>
+							</article>
+						{/each}
+					</div>
+				</div>
+			{/if}
 		</div>
 	</div>
 </div>
