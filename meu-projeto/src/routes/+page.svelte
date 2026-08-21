@@ -1,9 +1,3 @@
-<script module lang="ts">
-	// Vive no módulo, não na instância: sobrevive à destruição do componente
-	// quando navegamos para /movie/[id] e voltamos.
-	let lastSearch = '';
-</script>
-
 <script lang="ts">
 	import ShowCard from '../components/ShowCard.svelte';
 	import Search from '../components/Search.svelte';
@@ -13,24 +7,65 @@
 	import XCircleIcon from 'phosphor-svelte/lib/XCircleIcon';
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
+	import { page as currentPage } from '$app/state';
+	import { replaceState } from '$app/navigation';
 
-	let search = $state(lastSearch);
+	const initialSearch = currentPage.url.searchParams.get('q') ?? '';
+	const initialPage = Number(currentPage.url.searchParams.get('page')) || 1;
 
-	let debouncedSearch = $state(lastSearch);
+	let search = $state(initialSearch);
+	let debouncedSearch = $state(initialSearch);
+	let page = $state(initialPage); // página atual
 
-	let page = $state(1);
+	let initialized = false;
 
 	$effect(() => {
 		const query = search;
 
 		const timer = setTimeout(() => {
 			debouncedSearch = query;
-			lastSearch = query;
+
+			// Ignora a execução inicial para não alterar a URL ao carregar a página.
+			if (!initialized) {
+				initialized = true;
+				return;
+			}
+
+			// Toda nova pesquisa começa na primeira página.
 			page = 1;
+
+			// Cria uma cópia da URL atual para atualizar seus parâmetros.
+			const url = new URL(window.location.href);
+
+			if (query.trim()) {
+				url.searchParams.set('q', query.trim());
+			} else {
+				url.searchParams.delete('q');
+			}
+
+			// Remove a página anterior, pois uma nova pesquisa começa na página 1.
+			url.searchParams.delete('page');
+
+			// Atualiza a URL sem criar uma nova entrada no histórico do navegador.
+			replaceState(url, {});
 		}, 350);
 
 		return () => clearTimeout(timer);
 	});
+
+	function changePage(newPage: number) {
+		page = newPage;
+
+		const url = new URL(window.location.href);
+
+		if (newPage === 1) {
+			url.searchParams.delete('page');
+		} else {
+			url.searchParams.set('page', String(newPage));
+		}
+
+		replaceState(url, {});
+	}
 
 	const showsQuery = createInfiniteQuery(() => ({
 		queryKey: ['shows', debouncedSearch],
@@ -41,8 +76,6 @@
 		initialPageParam: 0,
 
 		getNextPageParam: (lastPage, allPages) => {
-			// A busca do TVMaze ignora o pageParam e devolve tudo de uma vez.
-			// Sem isso, fetchNextPage() repete a mesma busca e duplica os ids.
 			if (debouncedSearch.trim() !== '') {
 				return undefined;
 			}
@@ -54,6 +87,7 @@
 			return allPages.length;
 		}
 	}));
+
 	const allShows = $derived(showsQuery.data?.pages.flat() ?? []);
 
 	const pageShows = $derived(allShows.slice((page - 1) * 20, page * 20));
@@ -71,8 +105,6 @@
 	});
 
 	const hasNextPageUI = $derived(pageShows.length === 20);
-
-	console.log('showsQuery: ', showsQuery);
 </script>
 
 <div class="min-h-screen p-6 text-gray-100 antialiased">
@@ -120,7 +152,7 @@
 	<!-- Paginação fora do <main>: dentro dele, cada botão virava uma célula do grid -->
 	<div class="mx-auto mt-10 flex max-w-7xl items-center justify-center gap-4">
 		<button
-			onclick={() => page--}
+			onclick={() => changePage(page - 1)}
 			disabled={page === 1}
 			class="flex items-center gap-1 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-[#ff5820] hover:bg-[#ff5820] hover:text-white disabled:pointer-events-none disabled:opacity-40"
 		>
@@ -131,7 +163,7 @@
 		<span class="min-w-10 text-center text-sm font-semibold text-neutral-200">{page}</span>
 
 		<button
-			onclick={() => page++}
+			onclick={() => changePage(page + 1)}
 			disabled={!hasNextPageUI || showsQuery.isFetchingNextPage}
 			class="flex items-center gap-1 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-[#ff5820] hover:bg-[#ff5820] hover:text-white disabled:pointer-events-none disabled:opacity-40"
 		>
