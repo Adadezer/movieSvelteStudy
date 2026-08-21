@@ -45,8 +45,9 @@ function mapToCastMember(entry: TVMazeCastResult): CastMember {
 	};
 }
 
-export async function getShows() {
-	const results = await get<TVMazeResult[]>('/shows');
+export async function getTVMazeShows(page: number) {
+	const results = await get<TVMazeResult[]>(`/shows?page=${page}`);
+
 	return results.map(mapToShow);
 }
 

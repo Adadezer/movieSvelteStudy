@@ -1,23 +1,76 @@
+<script module lang="ts">
+	// Vive no módulo, não na instância: sobrevive à destruição do componente
+	// quando navegamos para /movie/[id] e voltamos.
+	let lastSearch = '';
+</script>
+
 <script lang="ts">
 	import ShowCard from '../components/ShowCard.svelte';
 	import Search from '../components/Search.svelte';
-	import { getShows, searchShows } from '$lib/api/tvmaze';
-	import { createQuery } from '@tanstack/svelte-query';
+	import { getTVMazeShows, searchShows } from '$lib/api/tvmaze';
+	import { createInfiniteQuery } from '@tanstack/svelte-query';
+	import SpinnerGapIcon from 'phosphor-svelte/lib/SpinnerGapIcon';
+	import XCircleIcon from 'phosphor-svelte/lib/XCircleIcon';
+	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
+	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
 
-	let search = $state('');
+	let search = $state(lastSearch);
 
-	let debouncedSearch = $state('');
+	let debouncedSearch = $state(lastSearch);
+
+	let page = $state(1);
 
 	$effect(() => {
-		const query = search; // leitura rastreada — NÃO remover
-		const timer = setTimeout(() => (debouncedSearch = query), 350);
+		const query = search;
+
+		const timer = setTimeout(() => {
+			debouncedSearch = query;
+			lastSearch = query;
+			page = 1;
+		}, 350);
+
 		return () => clearTimeout(timer);
 	});
 
-	const showsQuery = createQuery(() => ({
+	const showsQuery = createInfiniteQuery(() => ({
 		queryKey: ['shows', debouncedSearch],
-		queryFn: () => (debouncedSearch.trim() !== '' ? searchShows(debouncedSearch) : getShows())
+
+		queryFn: ({ pageParam }) =>
+			debouncedSearch.trim() !== '' ? searchShows(debouncedSearch) : getTVMazeShows(pageParam),
+
+		initialPageParam: 0,
+
+		getNextPageParam: (lastPage, allPages) => {
+			// A busca do TVMaze ignora o pageParam e devolve tudo de uma vez.
+			// Sem isso, fetchNextPage() repete a mesma busca e duplica os ids.
+			if (debouncedSearch.trim() !== '') {
+				return undefined;
+			}
+
+			if (lastPage.length === 0) {
+				return undefined;
+			}
+
+			return allPages.length;
+		}
 	}));
+	const allShows = $derived(showsQuery.data?.pages.flat() ?? []);
+
+	const pageShows = $derived(allShows.slice((page - 1) * 20, page * 20));
+
+	$effect(() => {
+		const requiredShows = page * 20;
+
+		if (
+			requiredShows > allShows.length &&
+			showsQuery.hasNextPage &&
+			!showsQuery.isFetchingNextPage
+		) {
+			showsQuery.fetchNextPage();
+		}
+	});
+
+	const hasNextPageUI = $derived(pageShows.length === 20);
 
 	console.log('showsQuery: ', showsQuery);
 </script>
@@ -39,22 +92,51 @@
 		class="mx-auto grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
 	>
 		{#if showsQuery.isLoading}
-			<div class="col-span-full py-20 text-center text-gray-500">
-				<p class="text-xl">Carregando...</p>
+			<div
+				class="col-span-full flex flex-col items-center justify-center gap-2 py-20 text-center text-gray-500"
+			>
+				<SpinnerGapIcon size={30} class="animate-[spin_3s_linear_infinite]" />
+				<p class="text-xl">Carregando</p>
 			</div>
 		{:else if showsQuery.isError}
-			<div class="col-span-full py-20 text-center text-gray-500">
-				<p class="text-xl">Erro ao carregar os dados. Tente novamente mais tarde.</p>
+			<div
+				class="col-span-full flex flex-col items-center justify-center gap-2 py-20 text-center text-gray-500"
+			>
+				<XCircleIcon size={32} />
+				<p class="text-xl">Erro ao carregar os dados.</p>
+				<p class="text-md">Tente novamente mais tarde.</p>
 			</div>
 		{:else}
-			{#each showsQuery.data as show (show.id)}
+			{#each pageShows as show (show.id)}
 				<ShowCard {show} />
 			{:else}
-				<!-- Estado vazio caso a busca não encontre nada -->
 				<div class="col-span-full py-20 text-center text-gray-500">
 					<p class="text-xl">Nenhum resultado encontrado para "{search}"</p>
 				</div>
 			{/each}
 		{/if}
 	</main>
+
+	<!-- Paginação fora do <main>: dentro dele, cada botão virava uma célula do grid -->
+	<div class="mx-auto mt-10 flex max-w-7xl items-center justify-center gap-4">
+		<button
+			onclick={() => page--}
+			disabled={page === 1}
+			class="flex items-center gap-1 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-[#ff5820] hover:bg-[#ff5820] hover:text-white disabled:pointer-events-none disabled:opacity-40"
+		>
+			<ArrowLeftIcon size={14} weight="fill" />
+			Anterior
+		</button>
+
+		<span class="min-w-10 text-center text-sm font-semibold text-neutral-200">{page}</span>
+
+		<button
+			onclick={() => page++}
+			disabled={!hasNextPageUI || showsQuery.isFetchingNextPage}
+			class="flex items-center gap-1 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-[#ff5820] hover:bg-[#ff5820] hover:text-white disabled:pointer-events-none disabled:opacity-40"
+		>
+			Próxima
+			<ArrowRightIcon size={14} weight="fill" />
+		</button>
+	</div>
 </div>
