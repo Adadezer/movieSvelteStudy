@@ -2,11 +2,18 @@
 	import type { Show } from '$lib/types/show';
 	import ImageIcon from 'phosphor-svelte/lib/ImageIcon';
 	import StarIcon from 'phosphor-svelte/lib/StarIcon';
+	import { fly } from 'svelte/transition';
+	import { prefersReducedMotion } from 'svelte/motion';
 
-	let { show }: { show: Show } = $props();
+	let { show, index = 0 }: { show: Show; index?: number } = $props();
 </script>
 
 <article
+	in:fly|global={{
+		y: 20,
+		duration: prefersReducedMotion.current ? 0 : 500,
+		delay: prefersReducedMotion.current ? 0 : index * 50
+	}}
 	class="group relative flex flex-col overflow-hidden rounded-xl border border-gray-800 bg-gray-900 transition-all duration-300 hover:-translate-y-1 hover:border-[#ff5820]/50 hover:shadow-xl hover:shadow-[#ff5820]/10"
 >
 	<!-- Container da Imagem com Aspect Ratio de Poster (2:3) -->

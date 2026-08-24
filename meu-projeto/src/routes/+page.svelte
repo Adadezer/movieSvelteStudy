@@ -9,6 +9,7 @@
 	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
 	import { page as currentPage } from '$app/state';
 	import { goto, replaceState } from '$app/navigation';
+	import ShowCardSkeleton from '../components/ShowCardSkeleton.svelte';
 
 	const initialSearch = currentPage.url.searchParams.get('q') ?? '';
 	const initialPage = Number(currentPage.url.searchParams.get('page')) || 1;
@@ -128,12 +129,9 @@
 		class="mx-auto grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
 	>
 		{#if showsQuery.isLoading}
-			<div
-				class="col-span-full flex flex-col items-center justify-center gap-2 py-20 text-center text-gray-500"
-			>
-				<SpinnerGapIcon size={30} class="animate-[spin_3s_linear_infinite]" />
-				<p class="text-xl">Carregando</p>
-			</div>
+			{#each Array.from({ length: 20 }) as _, i (i)}
+				<ShowCardSkeleton />
+			{/each}
 		{:else if showsQuery.isError}
 			<div
 				class="col-span-full flex flex-col items-center justify-center gap-2 py-20 text-center text-gray-500"
@@ -143,12 +141,8 @@
 				<p class="text-md">Tente novamente mais tarde.</p>
 			</div>
 		{:else}
-			{#each pageShows as show (show.id)}
-				<ShowCard {show} />
-			{:else}
-				<div class="col-span-full py-20 text-center text-gray-500">
-					<p class="text-xl">Nenhum resultado encontrado para "{search}"</p>
-				</div>
+			{#each pageShows as show, i (show.id)}
+				<ShowCard {show} index={i} />
 			{/each}
 		{/if}
 	</main>
