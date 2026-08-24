@@ -8,7 +8,7 @@
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
 	import { page as currentPage } from '$app/state';
-	import { replaceState } from '$app/navigation';
+	import { goto, replaceState } from '$app/navigation';
 
 	const initialSearch = currentPage.url.searchParams.get('q') ?? '';
 	const initialPage = Number(currentPage.url.searchParams.get('page')) || 1;
@@ -46,8 +46,12 @@
 			// Remove a página anterior, pois uma nova pesquisa começa na página 1.
 			url.searchParams.delete('page');
 
-			// Atualiza a URL sem criar uma nova entrada no histórico do navegador.
-			replaceState(url, {});
+			// Navega para a nova URL e cria uma entrada no histórico.
+			goto(url, {
+				replaceState: false,
+				keepFocus: true,
+				noScroll: true
+			});
 		}, 350);
 
 		return () => clearTimeout(timer);
