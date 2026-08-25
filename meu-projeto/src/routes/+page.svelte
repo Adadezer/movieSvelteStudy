@@ -8,11 +8,16 @@
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
 	import { page as currentPage } from '$app/state';
+	import { browser } from '$app/environment';
 	import { goto, replaceState } from '$app/navigation';
 	import ShowCardSkeleton from '../components/ShowCardSkeleton.svelte';
 
-	const initialSearch = currentPage.url.searchParams.get('q') ?? '';
-	const initialPage = Number(currentPage.url.searchParams.get('page')) || 1;
+	// replaceState() é shallow routing: muda a URL do navegador mas NÃO atualiza o
+	// page.url do $app/state. Ao voltar dos detalhes, só location tem o ?page atual.
+	const initialUrl = browser ? new URL(location.href) : currentPage.url;
+
+	const initialSearch = initialUrl.searchParams.get('q') ?? '';
+	const initialPage = Number(initialUrl.searchParams.get('page')) || 1;
 
 	let search = $state(initialSearch);
 	let debouncedSearch = $state(initialSearch);
