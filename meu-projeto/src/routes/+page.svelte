@@ -3,7 +3,6 @@
 	import Search from '../components/Search.svelte';
 	import { getTVMazeShows, searchShows } from '$lib/api/tvmaze';
 	import { createInfiniteQuery } from '@tanstack/svelte-query';
-	import SpinnerGapIcon from 'phosphor-svelte/lib/SpinnerGapIcon';
 	import XCircleIcon from 'phosphor-svelte/lib/XCircleIcon';
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';

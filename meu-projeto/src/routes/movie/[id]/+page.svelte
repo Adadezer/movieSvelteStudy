@@ -4,6 +4,7 @@
 	import MonitorPlayIcon from 'phosphor-svelte/lib/MonitorPlayIcon';
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import UserIcon from 'phosphor-svelte/lib/UserIcon';
+	import ImageIcon from 'phosphor-svelte/lib/ImageIcon';
 	import MicrophoneIcon from 'phosphor-svelte/lib/MicrophoneIcon';
 
 	let { data } = $props();
@@ -46,12 +47,20 @@
 			<div class="grid gap-8 p-8 md:grid-cols-[300px_1fr]">
 				<!-- Poster -->
 				<div>
-					<img
-						src={show.image}
-						alt={show.title}
-						class="w-full rounded-xl object-cover shadow-lg"
-						style="view-transition-name: poster-{show.id}"
-					/>
+					{#if show.image}
+						<img
+							src={show.image}
+							alt={show.title}
+							class="w-full rounded-xl object-cover shadow-lg"
+							style="view-transition-name: poster-{show.id}"
+						/>
+					{:else}
+						<div
+							class="flex aspect-2/3 w-full items-center justify-center rounded-xl bg-neutral-800 text-neutral-600 shadow-lg"
+						>
+							<ImageIcon size={48} />
+						</div>
+					{/if}
 				</div>
 
 				<!-- Informações -->
