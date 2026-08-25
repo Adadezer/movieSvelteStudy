@@ -1,31 +1,120 @@
 <script lang="ts">
 	import ShowCard from '../components/ShowCard.svelte';
 	import Search from '../components/Search.svelte';
-	import type { Show } from '$lib/types/show';
-	import { getShows, searchShows } from '$lib/api/tvmaze';
+	import { getTVMazeShows, searchShows } from '$lib/api/tvmaze';
+	import { createInfiniteQuery } from '@tanstack/svelte-query';
+	import SpinnerGapIcon from 'phosphor-svelte/lib/SpinnerGapIcon';
+	import XCircleIcon from 'phosphor-svelte/lib/XCircleIcon';
+	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
+	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
+	import { page as currentPage } from '$app/state';
+	import { browser } from '$app/environment';
+	import { goto, replaceState } from '$app/navigation';
+	import ShowCardSkeleton from '../components/ShowCardSkeleton.svelte';
 
-	let showList = $state<Show[]>([]);
+	// replaceState() é shallow routing: muda a URL do navegador mas NÃO atualiza o
+	// page.url do $app/state. Ao voltar dos detalhes, só location tem o ?page atual.
+	const initialUrl = browser ? new URL(location.href) : currentPage.url;
 
-	let search = $state('');
+	const initialSearch = initialUrl.searchParams.get('q') ?? '';
+	const initialPage = Number(initialUrl.searchParams.get('page')) || 1;
 
-	let requestId = 0;
+	let search = $state(initialSearch);
+	let debouncedSearch = $state(initialSearch);
+	let page = $state(initialPage); // página atual
 
-	async function loadShows(query: string) {
-		const id = ++requestId; // este pedido é o nº N
-
-		const data = query.trim() !== '' ? await searchShows(query) : await getShows();
-
-		if (id !== requestId) return; // já saiu um pedido mais novo -> descarta este
-		showList = data;
-
-		console.log('showList: ', data);
-	}
+	let initialized = false;
 
 	$effect(() => {
-		const query = search; // leitura rastreada — NÃO remover
-		const timer = setTimeout(() => loadShows(query), 500);
+		const query = search;
+
+		const timer = setTimeout(() => {
+			debouncedSearch = query;
+
+			// Ignora a execução inicial para não alterar a URL ao carregar a página.
+			if (!initialized) {
+				initialized = true;
+				return;
+			}
+
+			// Toda nova pesquisa começa na primeira página.
+			page = 1;
+
+			// Cria uma cópia da URL atual para atualizar seus parâmetros.
+			const url = new URL(window.location.href);
+
+			if (query.trim()) {
+				url.searchParams.set('q', query.trim());
+			} else {
+				url.searchParams.delete('q');
+			}
+
+			// Remove a página anterior, pois uma nova pesquisa começa na página 1.
+			url.searchParams.delete('page');
+
+			// Navega para a nova URL e cria uma entrada no histórico.
+			goto(url, {
+				replaceState: false,
+				keepFocus: true,
+				noScroll: true
+			});
+		}, 350);
+
 		return () => clearTimeout(timer);
 	});
+
+	function changePage(newPage: number) {
+		page = newPage;
+
+		const url = new URL(window.location.href);
+
+		if (newPage === 1) {
+			url.searchParams.delete('page');
+		} else {
+			url.searchParams.set('page', String(newPage));
+		}
+
+		replaceState(url, {});
+	}
+
+	const showsQuery = createInfiniteQuery(() => ({
+		queryKey: ['shows', debouncedSearch],
+
+		queryFn: ({ pageParam }) =>
+			debouncedSearch.trim() !== '' ? searchShows(debouncedSearch) : getTVMazeShows(pageParam),
+
+		initialPageParam: 0,
+
+		getNextPageParam: (lastPage, allPages) => {
+			if (debouncedSearch.trim() !== '') {
+				return undefined;
+			}
+
+			if (lastPage.length === 0) {
+				return undefined;
+			}
+
+			return allPages.length;
+		}
+	}));
+
+	const allShows = $derived(showsQuery.data?.pages.flat() ?? []);
+
+	const pageShows = $derived(allShows.slice((page - 1) * 20, page * 20));
+
+	$effect(() => {
+		const requiredShows = page * 20;
+
+		if (
+			requiredShows > allShows.length &&
+			showsQuery.hasNextPage &&
+			!showsQuery.isFetchingNextPage
+		) {
+			showsQuery.fetchNextPage();
+		}
+	});
+
+	const hasNextPageUI = $derived(pageShows.length === 20);
 </script>
 
 <div class="min-h-screen p-6 text-gray-100 antialiased">
@@ -44,13 +133,45 @@
 	<main
 		class="mx-auto grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
 	>
-		{#each showList as show (show.id)}
-			<ShowCard {show} />
-		{:else}
-			<!-- Estado vazio caso a busca não encontre nada -->
-			<div class="col-span-full py-20 text-center text-gray-500">
-				<p class="text-xl">Nenhum resultado encontrado para "{search}"</p>
+		{#if showsQuery.isLoading}
+			{#each Array.from({ length: 20 }) as _, i (i)}
+				<ShowCardSkeleton />
+			{/each}
+		{:else if showsQuery.isError}
+			<div
+				class="col-span-full flex flex-col items-center justify-center gap-2 py-20 text-center text-gray-500"
+			>
+				<XCircleIcon size={32} />
+				<p class="text-xl">Erro ao carregar os dados.</p>
+				<p class="text-md">Tente novamente mais tarde.</p>
 			</div>
-		{/each}
+		{:else}
+			{#each pageShows as show, i (show.id)}
+				<ShowCard {show} index={i} />
+			{/each}
+		{/if}
 	</main>
+
+	<!-- Paginação fora do <main>: dentro dele, cada botão virava uma célula do grid -->
+	<div class="mx-auto mt-10 flex max-w-7xl items-center justify-center gap-4">
+		<button
+			onclick={() => changePage(page - 1)}
+			disabled={page === 1}
+			class="flex items-center gap-1 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-[#ff5820] hover:bg-[#ff5820] hover:text-white disabled:pointer-events-none disabled:opacity-40"
+		>
+			<ArrowLeftIcon size={14} weight="fill" />
+			Anterior
+		</button>
+
+		<span class="min-w-10 text-center text-sm font-semibold text-neutral-200">{page}</span>
+
+		<button
+			onclick={() => changePage(page + 1)}
+			disabled={!hasNextPageUI || showsQuery.isFetchingNextPage}
+			class="flex items-center gap-1 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-[#ff5820] hover:bg-[#ff5820] hover:text-white disabled:pointer-events-none disabled:opacity-40"
+		>
+			Próxima
+			<ArrowRightIcon size={14} weight="fill" />
+		</button>
+	</div>
 </div>

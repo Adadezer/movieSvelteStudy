@@ -5,7 +5,6 @@
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import UserIcon from 'phosphor-svelte/lib/UserIcon';
 	import MicrophoneIcon from 'phosphor-svelte/lib/MicrophoneIcon';
-	import { goto } from '$app/navigation';
 
 	let { data } = $props();
 
@@ -36,7 +35,7 @@
 	<div class="mx-auto max-w-6xl">
 		<div class="mx-auto mb-6 flex max-w-6xl">
 			<button
-				onclick={() => goto('/')}
+				onclick={() => history.back()}
 				class=" flex items-center gap-1 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-[#ff5820] hover:bg-[#ff5820] hover:text-white"
 			>
 				<ArrowLeftIcon size={14} weight="fill" />
@@ -47,7 +46,12 @@
 			<div class="grid gap-8 p-8 md:grid-cols-[300px_1fr]">
 				<!-- Poster -->
 				<div>
-					<img src={show.image} alt={show.title} class="w-full rounded-xl object-cover shadow-lg" />
+					<img
+						src={show.image}
+						alt={show.title}
+						class="w-full rounded-xl object-cover shadow-lg"
+						style="view-transition-name: poster-{show.id}"
+					/>
 				</div>
 
 				<!-- Informações -->

@@ -23,7 +23,9 @@ export type TVMazeCastResult = {
 };
 
 export type CastMember = {
-	id: number;
+	// person.id + character.id: dois atores podem dividir o mesmo personagem
+	// (temporadas diferentes), então character.id sozinho se repete.
+	id: string;
 	actor: string;
 	character: string;
 	image: string;

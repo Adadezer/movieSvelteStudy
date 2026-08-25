@@ -37,7 +37,7 @@ function mapToShow(result: TVMazeResult): Show {
 
 function mapToCastMember(entry: TVMazeCastResult): CastMember {
 	return {
-		id: entry.character.id,
+		id: `${entry.person.id}-${entry.character.id}`, // resolve bug de um personagem ter 2 atores diferentes, resultando em comportamento estranho no click (filme: The Strain)
 		actor: entry.person.name,
 		character: entry.character.name,
 		image: entry.character.image?.medium ?? entry.person.image?.medium ?? '',
@@ -45,8 +45,9 @@ function mapToCastMember(entry: TVMazeCastResult): CastMember {
 	};
 }
 
-export async function getShows() {
-	const results = await get<TVMazeResult[]>('/shows');
+export async function getTVMazeShows(page: number) {
+	const results = await get<TVMazeResult[]>(`/shows?page=${page}`);
+
 	return results.map(mapToShow);
 }
 
