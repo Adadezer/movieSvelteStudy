@@ -46,7 +46,12 @@
 			<div class="grid gap-8 p-8 md:grid-cols-[300px_1fr]">
 				<!-- Poster -->
 				<div>
-					<img src={show.image} alt={show.title} class="w-full rounded-xl object-cover shadow-lg" />
+					<img
+						src={show.image}
+						alt={show.title}
+						class="w-full rounded-xl object-cover shadow-lg"
+						style="view-transition-name: poster-{show.id}"
+					/>
 				</div>
 
 				<!-- Informações -->

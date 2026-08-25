@@ -4,6 +4,7 @@
 	import StarIcon from 'phosphor-svelte/lib/StarIcon';
 	import { fly } from 'svelte/transition';
 	import { prefersReducedMotion } from 'svelte/motion';
+	import { nav } from '$lib/state/navigation.svelte';
 
 	let { show, index = 0 }: { show: Show; index?: number } = $props();
 </script>
@@ -11,8 +12,11 @@
 <article
 	in:fly|global={{
 		y: 20,
-		duration: prefersReducedMotion.current ? 0 : 500,
-		delay: prefersReducedMotion.current ? 0 : index * 50
+		duration: prefersReducedMotion.current || nav.transitioning ? 0 : 500, // "Não anime se o usuário pediu para não animar, ou se o navegador já está animando. Caso contrário, 500ms."
+		delay: prefersReducedMotion.current || nav.transitioning ? 0 : index * 50
+		// Quando o navegador está animando, o Svelte cede.
+		// prefersReducedMotion → acessibilidade. Alguém pode passar mal com movimento.
+		//nav.transitioning → coordenação. Já tem outro animando; dois ao mesmo tempo estragam o resultado.
 	}}
 	class="group relative flex flex-col overflow-hidden rounded-xl border border-gray-800 bg-gray-900 transition-all duration-300 hover:-translate-y-1 hover:border-[#ff5820]/50 hover:shadow-xl hover:shadow-[#ff5820]/10"
 >
@@ -24,6 +28,7 @@
 				alt={show.title}
 				class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
 				loading="lazy"
+				style="view-transition-name: poster-{show.id}"
 			/>
 		{:else}
 			<div class="flex h-full w-full items-center justify-center bg-gray-800 text-gray-600">
