@@ -23,8 +23,9 @@ export type TVMazeCastResult = {
 };
 
 export type CastMember = {
-	// person.id + character.id: dois atores podem dividir o mesmo personagem
-	// (temporadas diferentes), então character.id sozinho se repete.
+	// forçar erro para ver bug e tratamento de erro, aqui e em tvmaze.ts
+	// id: number;
+	// person.id + character.id: dois atores podem dividir o mesmo personagem (temporadas diferentes), então character.id sozinho se repete.
 	id: string;
 	actor: string;
 	character: string;
