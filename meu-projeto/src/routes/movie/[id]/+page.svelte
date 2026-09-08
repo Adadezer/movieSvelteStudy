@@ -1,5 +1,4 @@
 <script lang="ts">
-	import StarIcon from 'phosphor-svelte/lib/StarIcon';
 	import CalendarIcon from 'phosphor-svelte/lib/CalendarIcon';
 	import MonitorPlayIcon from 'phosphor-svelte/lib/MonitorPlayIcon';
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
@@ -8,17 +7,13 @@
 	import MicrophoneIcon from 'phosphor-svelte/lib/MicrophoneIcon';
 	import XCircleIcon from 'phosphor-svelte/lib/XCircleIcon';
 	import { dev } from '$app/environment';
+	import Rating from '../../../components/Rating.svelte';
 
 	let { data } = $props();
 
 	const show = $derived(data.show);
 
 	const showInfo = $derived([
-		{
-			titleInfo: 'Nota',
-			info: show.rating,
-			icon: StarIcon
-		},
 		{
 			titleInfo: 'Ano',
 			info: show.year,
@@ -63,6 +58,14 @@
 							<ImageIcon size={48} />
 						</div>
 					{/if}
+
+					<!-- Anel de avaliação -->
+					<div class="mt-6 flex flex-col items-center gap-2">
+						<Rating rating={show.rating} size={120} />
+						<span class="font-mono text-xs tracking-widest text-neutral-500 uppercase">
+							{show.rating === 0 ? 'sem avaliação' : 'nota'}
+						</span>
+					</div>
 				</div>
 
 				<!-- Informações -->

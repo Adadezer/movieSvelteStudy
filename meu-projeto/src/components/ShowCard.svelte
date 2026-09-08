@@ -20,7 +20,7 @@
 	}}
 	class="group relative flex flex-col overflow-hidden rounded-xl border border-gray-800 bg-gray-900 transition-all duration-300 hover:-translate-y-1 hover:border-[#ff5820]/50 hover:shadow-xl hover:shadow-[#ff5820]/10"
 >
-	<!-- Container da Imagem com Aspect Ratio de Poster (2:3) -->
+	<!-- Relative para o badge de rating -->
 	<div class="relative aspect-2/3 overflow-hidden">
 		{#if show.image}
 			<img
@@ -49,10 +49,8 @@
 	<div class="flex flex-1 flex-col p-4">
 		<div class="mb-2 flex items-center justify-between text-xs font-medium text-gray-400">
 			<span>{show.year}</span>
-			<!-- 1. Verifica se a lista de gêneros existe e tem itens -->
 			{#if show.genres && show.genres.length > 0}
 				<div class="flex gap-1">
-					<!-- 2. Usando o bloco {#each} correto do Svelte em vez do .map() do React -->
 					{#each show.genres as genre}
 						<span class="rounded bg-gray-800 px-1.5 py-0.5 text-[#ff5820]/90">
 							{genre}
