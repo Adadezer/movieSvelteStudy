@@ -37,7 +37,7 @@ function mapToShow(result: TVMazeResult): Show {
 
 function mapToCastMember(entry: TVMazeCastResult): CastMember {
 	return {
-		// id: entry.person.id, // forçar erro para ver bug e tratamento de erro, aqui e em client.ts
+		// id: entry.person.id, // forçar erro para ver bug e tratamento de erro, aqui e em client.ts (filme: Person of Interest)
 		id: `${entry.person.id}-${entry.character.id}`, // resolve bug de um personagem ter 2 atores diferentes, resultando em erro na navegação e pagina indo para o topo da home.
 		actor: entry.person.name,
 		character: entry.character.name,
