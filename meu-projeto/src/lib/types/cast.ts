@@ -23,9 +23,8 @@ export type TVMazeCastResult = {
 };
 
 export type CastMember = {
-	// person.id + character.id: dois atores podem dividir o mesmo personagem
-	// (temporadas diferentes), então character.id sozinho se repete.
-	id: string;
+	// id: number; // forçar erro para ver bug e tratamento de erro, aqui e em tvmaze.ts (filme: Person of Interest)
+	id: string; // person.id + character.id: dois atores podem dividir o mesmo personagem (temporadas diferentes), então character.id sozinho se repete.
 	actor: string;
 	character: string;
 	image: string;
