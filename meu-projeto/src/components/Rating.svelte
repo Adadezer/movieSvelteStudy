@@ -3,7 +3,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import { nav } from '$lib/state/navigation.svelte';
 
-	let { rating, size = 42 }: { rating: number; size?: number } = $props();
+	let { rating, size = 42 }: { rating: number | null; size?: number } = $props();
 
 	// Espessura e raio derivam do tamanho, para o anel funcionar em qualquer escala.
 	const stroke = $derived(Math.max(3, Math.round(size * 0.075)));
@@ -19,14 +19,15 @@
 		// aqui seria invisível. Esperamos a flag baixar para o anel preencher à vista.
 		if (nav.transitioning) return;
 
-		classification.set(rating, {
+		// null = sem avaliação: o anel fica vazio, mas o número vira um traço.
+		classification.set(rating ?? 0, {
 			duration: prefersReducedMotion.current ? 0 : 900
 		});
 	});
 
 	const color = $derived(
-		rating === 0
-			? '#9099a2' // sem avaliação: a API mandou null, não é nota zero
+		rating === null
+			? '#9099a2' // sem avaliação — cinza, não vermelho
 			: rating < 6.5
 				? '#e0574d'
 				: rating < 8
@@ -66,6 +67,6 @@
 		class="absolute inset-0 flex items-center justify-center font-bold"
 		style="color: {color}; font-size: {fontSize}px"
 	>
-		{classification.current.toFixed(1)}
+		{rating === null ? 'S/A' : classification.current.toFixed(1)}
 	</span>
 </div>

@@ -10,6 +10,7 @@
 	import { browser } from '$app/environment';
 	import { goto, replaceState } from '$app/navigation';
 	import ShowCardSkeleton from '../components/ShowCardSkeleton.svelte';
+	import Order from '../components/Order.svelte';
 
 	// replaceState() é shallow routing: muda a URL do navegador mas NÃO atualiza o
 	// page.url do $app/state. Ao voltar dos detalhes, só location tem o ?page atual.
@@ -17,12 +18,15 @@
 
 	const initialSearch = initialUrl.searchParams.get('q') ?? '';
 	const initialPage = Number(initialUrl.searchParams.get('page')) || 1;
+	const initialSort = initialUrl.searchParams.get('sort') || '';
 
 	let search = $state(initialSearch);
 	let debouncedSearch = $state(initialSearch);
 	let page = $state(initialPage); // página atual
+	let sort = $state(initialSort); // critério de ordenação
 
 	let initialized = false;
+	let initializedSort = false;
 
 	$effect(() => {
 		const query = search;
@@ -99,7 +103,49 @@
 
 	const allShows = $derived(showsQuery.data?.pages.flat() ?? []);
 
-	const pageShows = $derived(allShows.slice((page - 1) * 20, page * 20));
+	const sortedShows = $derived(
+		allShows.toSorted((a, b) => {
+			if (sort === 'rating') {
+				// Sem avaliação vai para o fim por não ter nota — não por ser ruim.
+				if (a.rating === null) return 1;
+				if (b.rating === null) return -1;
+
+				return b.rating - a.rating;
+			} else if (sort === 'name') {
+				return a.title.localeCompare(b.title);
+			}
+			return 0;
+		})
+	);
+
+	$effect(() => {
+		const query = sort;
+
+		if (!initializedSort) {
+			initializedSort = true;
+			return;
+		}
+
+		if (query) {
+			page = 1;
+		}
+
+		// Cria uma cópia da URL atual para atualizar seus parâmetros.
+		const url = new URL(window.location.href);
+
+		if (query.trim()) {
+			url.searchParams.set('sort', query.trim());
+		} else {
+			url.searchParams.delete('sort');
+		}
+
+		// Remove a página anterior, pois uma nova pesquisa começa na página 1.
+		url.searchParams.delete('page');
+
+		replaceState(url, {});
+	});
+
+	const pageShows = $derived(sortedShows.slice((page - 1) * 20, page * 20));
 
 	$effect(() => {
 		const requiredShows = page * 20;
@@ -125,7 +171,10 @@
 		<h3 class="mb-20 text-xl font-light tracking-tight text-neutral-200 md:text-xl">
 			Veja sobre seus filmes e séries favoritos
 		</h3>
-		<Search bind:searchShow={search} />
+		<div class="flex justify-between">
+			<Search bind:searchShow={search} />
+			<Order bind:sort />
+		</div>
 	</div>
 
 	<!-- GRID RESPONSIVO: 1 coluna no mobile, 2 em telas médias, 3 em grandes e 4 em extra grandes -->
@@ -143,6 +192,14 @@
 				<XCircleIcon size={32} />
 				<p class="text-xl">Erro ao carregar os dados.</p>
 				<p class="text-md">Tente novamente mais tarde.</p>
+			</div>
+		{:else if pageShows.length === 0}
+			<div
+				class="col-span-full flex flex-col items-center justify-center gap-2 py-20 text-center text-gray-500"
+			>
+				<XCircleIcon size={32} />
+				<p class="text-xl">Nenhum resultado encontrado.</p>
+				<p class="text-md">Tente outra pesquisa.</p>
 			</div>
 		{:else}
 			{#each pageShows as show, i (show.id)}

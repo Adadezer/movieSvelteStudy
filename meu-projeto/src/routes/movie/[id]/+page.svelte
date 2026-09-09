@@ -63,7 +63,7 @@
 					<div class="mt-6 flex flex-col items-center gap-2">
 						<Rating rating={show.rating} size={120} />
 						<span class="font-mono text-xs tracking-widest text-neutral-500 uppercase">
-							{show.rating === 0 ? 'sem avaliação' : 'nota'}
+							{show.rating === null ? 'sem avaliação' : 'nota'}
 						</span>
 					</div>
 				</div>

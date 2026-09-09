@@ -26,7 +26,8 @@ export type TVMazeSearchResult = {
 export type Show = {
 	id: number;
 	title: string;
-	rating: number;
+	// null = a API não tem avaliação. NÃO troque por 0: 'sem nota' e 'nota zero' são coisas diferentes, e nenhum show do TVMaze tem 0 real.
+	rating: number | null;
 	year: string;
 	image: string;
 	genres: string[];
