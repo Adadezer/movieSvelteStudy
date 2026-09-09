@@ -41,7 +41,7 @@
 			class="absolute top-3 right-3 flex items-center gap-1 rounded-md border border-gray-800 bg-gray-950/80 px-2 py-1 text-xs font-bold text-yellow-500 backdrop-blur-sm"
 		>
 			<StarIcon size={14} weight="fill" class="text-yellow-300" />
-			{show.rating}
+			{show.rating ?? 'S/A'}
 		</div>
 	</div>
 

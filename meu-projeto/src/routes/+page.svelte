@@ -106,6 +106,10 @@
 	const sortedShows = $derived(
 		allShows.toSorted((a, b) => {
 			if (sort === 'rating') {
+				// Sem avaliação vai para o fim por não ter nota — não por ser ruim.
+				if (a.rating === null) return 1;
+				if (b.rating === null) return -1;
+
 				return b.rating - a.rating;
 			} else if (sort === 'name') {
 				return a.title.localeCompare(b.title);

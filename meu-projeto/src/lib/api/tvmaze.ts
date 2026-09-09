@@ -25,7 +25,7 @@ function mapToShow(result: TVMazeResult): Show {
 	return {
 		id: result.id,
 		title: result.name,
-		rating: result.rating.average ?? 0,
+		rating: result.rating.average,
 		year: result.premiered?.slice(0, 4) ?? '-',
 		image: result.image?.medium ?? result.image?.original ?? '',
 		genres: result.genres,
