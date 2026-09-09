@@ -18,13 +18,15 @@
 
 	const initialSearch = initialUrl.searchParams.get('q') ?? '';
 	const initialPage = Number(initialUrl.searchParams.get('page')) || 1;
+	const initialSort = initialUrl.searchParams.get('sort') || '';
 
 	let search = $state(initialSearch);
 	let debouncedSearch = $state(initialSearch);
 	let page = $state(initialPage); // página atual
-	let sort = $state(''); // critério de ordenação
+	let sort = $state(initialSort); // critério de ordenação
 
 	let initialized = false;
+	let initializedSort = false;
 
 	$effect(() => {
 		const query = search;
@@ -108,10 +110,36 @@
 			} else if (sort === 'name') {
 				return a.title.localeCompare(b.title);
 			}
-
 			return 0;
 		})
 	);
+
+	$effect(() => {
+		const query = sort;
+
+		if (!initializedSort) {
+			initializedSort = true;
+			return;
+		}
+
+		if (query) {
+			page = 1;
+		}
+
+		// Cria uma cópia da URL atual para atualizar seus parâmetros.
+		const url = new URL(window.location.href);
+
+		if (query.trim()) {
+			url.searchParams.set('sort', query.trim());
+		} else {
+			url.searchParams.delete('sort');
+		}
+
+		// Remove a página anterior, pois uma nova pesquisa começa na página 1.
+		url.searchParams.delete('page');
+
+		replaceState(url, {});
+	});
 
 	const pageShows = $derived(sortedShows.slice((page - 1) * 20, page * 20));
 

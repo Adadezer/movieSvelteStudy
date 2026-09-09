@@ -14,10 +14,10 @@
 			bind:value={sort}
 			class="rounded-md border border-[#ff5820] py-1 pr-3 pl-8 text-left hover:bg-neutral-700 hover:text-white"
 		>
-			<option value="" disabled selected>Ordenar por</option>
+			<option value="" disabled>Ordenar por</option>
 			<option value="rating">Ordenar por avaliação</option>
 			<option value="name">Ordenar por nome</option>
-			<option value="">Sem ordem</option>
+			<option value="none">Sem ordem</option>
 		</select>
 	</div>
 </div>
